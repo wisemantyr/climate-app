@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy import stats 
 
 import datetime as dt
 
@@ -70,11 +71,11 @@ def tobs():
     YearBefore = dt.date(2017, 8, 18) - dt.timedelta(days=365)
     YearBeforeString = YearBefore.strftime(DateFormat)
     TempData = session.query(Measurement.date, Measurement.tobs).filter(Measurement.date >= YearBeforeString, Measurement.station == MostActiveStation).all()
-    summary = (f"The most active station was {MostActiveStation}."
-    f"During the last recorded year at {MostActiveStation}" + ":" +
-    f"The lowest tempurature was {LowTemp}."
-    f"The highest tempurature was {HighTemp}."f"The average temperature was {AvgTemp}.")
-    return jsonify(TempData, summary)
+    summary = {"most-active-station": MostActiveStation,
+    "lowest-temp": LowTemp,
+    "highest-temp": HighTemp,
+    "average-temp": AvgTemp}
+    return jsonify(summary, TempData)
 
 #Query the dates and temperature observations of the most active 
 #station for the last year of data.
@@ -82,9 +83,19 @@ def tobs():
 #for the previous year.
 
 @app.route("/api/v1.0/<start>")
-def start():
-    return()
+def startonly(start):
+    TempDataStart = session.query(Measurement.tobs).filter(Measurement.date >= start).all()
+    LowTempStart = min(TempDataStart)
+    HighTempStart = max(TempDataStart)
+    ConvertedDataStart = [x[0] for x in TempDataStart]
+    AvgTempStart = round(np.average(ConvertedDataStart),2)
+    summary = {"lowest-temp": LowTempStart,
+    "highest-temp": HighTempStart,
+    "average-temp": AvgTempStart}
+    return jsonify(summary)
 
+#TMINStart = stats.tmin(TempDataStart)
+#TMAXStart = stats.tmax(TempDataStart)
 
 #Return a JSON list of the minimum temperature, 
 #the average temperature, and the max temperature 
@@ -92,9 +103,17 @@ def start():
 #When given the start only, calculate TMIN, TAVG, and TMAX 
 #for all dates greater than and equal to the start date.
 
-@app.route("/api/v1.0/<start><end>")
-def startend():
-    return()
+@app.route("/api/v1.0/<start>/<end>")
+def startend(start, end):
+    TempDataEnd = session.query(Measurement.tobs).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    LowTempEnd = min(TempDataEnd)
+    HighTempEnd = max(TempDataEnd)
+    ConvertedDataEnd = [y[0] for y in TempDataEnd]
+    AvgTempEnd = round(np.average(ConvertedDataEnd),2)
+    summary = {"lowest-temp": LowTempEnd,
+    "highest-temp": HighTempEnd,
+    "average-temp": AvgTempEnd}
+    return jsonify(summary)
 
  #When given the start and the end date, 
  #calculate the TMIN, TAVG, and TMAX for dates 

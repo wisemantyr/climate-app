@@ -1,6 +1,6 @@
 # sqlalchemy-challenge
 
-### Excercise Description:
+## Excercise Description
 
 <i> Use the provided hawaii.sqlite files to complete your climate analysis and data exploration.
   - Choose a start date and end date for your trip. Make sure that your vacation range is approximately 3-15 days total.
